@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import fr.xania.legendspanel.layout.ServerHeader
+import fr.xania.legendspanel.ui.layout.ServerHeader
 
 @Composable
 fun PanelLayout() {

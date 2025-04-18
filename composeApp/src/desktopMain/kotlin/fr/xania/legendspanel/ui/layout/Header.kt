@@ -1,4 +1,4 @@
-package fr.xania.legendspanel.layout
+package fr.xania.legendspanel.ui.layout
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
