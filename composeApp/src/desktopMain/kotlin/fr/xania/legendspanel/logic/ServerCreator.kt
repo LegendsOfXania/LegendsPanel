@@ -11,10 +11,11 @@ fun createServer(data: ServerCreationData) {
     File(data.jarPath).copyTo(targetJar, overwrite = true)
 
     File(targetDir, "eula.txt").writeText("eula=true")
+    File(targetDir, "server.properties").writeText("server-name=${data.name}")
 
     val launchCommand = "java -Xms1G -Xmx2G -jar server.jar nogui"
     File(targetDir, "start.sh").writeText("#!/bin/bash\n$launchCommand\n")
     File(targetDir, "start.bat").writeText("@echo off\n$launchCommand\n")
 
-    println("✅ Serveur créé dans ${targetDir.absolutePath}")
+    println("[DEBUG] Serveur créé dans ${targetDir.absolutePath}")
 }

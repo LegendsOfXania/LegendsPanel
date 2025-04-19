@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun ServerHeader(serverName: String = "server1") {
+fun Header(serverName: String) {
 
     Column(
         modifier = Modifier

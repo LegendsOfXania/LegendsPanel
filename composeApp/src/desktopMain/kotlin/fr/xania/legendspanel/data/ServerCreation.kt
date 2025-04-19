@@ -1,5 +1,8 @@
 package fr.xania.legendspanel.data
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import java.io.File
 
 @Serializable
@@ -17,7 +20,7 @@ object ServerRepository {
         val current = getServers().toMutableList()
         current.add(server)
         file.parentFile.mkdirs()
-        file.writeText(json.encodeToString(current))
+        file.writeText(json.encodeToString(ListSerializer(ServerCreationData.serializer()), current))
     }
 
     fun getServers(): List<ServerCreationData> {
@@ -27,9 +30,5 @@ object ServerRepository {
         } catch (e: Exception) {
             emptyList()
         }
-    }
-
-    fun nameExists(name: String): Boolean {
-        return getServers().any { it.name == name }
     }
 }

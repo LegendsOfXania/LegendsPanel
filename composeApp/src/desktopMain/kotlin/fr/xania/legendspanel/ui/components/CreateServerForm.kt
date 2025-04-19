@@ -8,8 +8,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import fr.xania.legendspanel.data.ServerCreationData
+import fr.xania.legendspanel.data.ServerRepository
+import fr.xania.legendspanel.logic.createServer
+import fr.xania.legendspanel.ui.animation.TypewriterText
 import java.io.File
 import java.awt.FileDialog
 import java.awt.Frame
@@ -21,7 +27,7 @@ fun CreateServerForm(onCreate: (ServerCreationData) -> Unit) {
     var jarPath by remember { mutableStateOf("") }
     var targetFolder by remember { mutableStateOf("") }
 
-    val isNameExists = name.isNotBlank() && name == "existingServer"
+    val isNameExists = name.isNotBlank() && targetFolder.isNotBlank() && File(targetFolder, name).exists()
     val isFormValid = name.isNotBlank() && jarPath.isNotBlank() && targetFolder.isNotBlank() && !isNameExists
 
     Box(
@@ -39,6 +45,12 @@ fun CreateServerForm(onCreate: (ServerCreationData) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            TypewriterText(
+                text = "Créer un serveur",
+                speed = 50,
+                style = TextStyle(fontSize = 26.sp, color = Color.White, fontWeight = FontWeight.Bold)
+            )
+
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
@@ -52,7 +64,7 @@ fun CreateServerForm(onCreate: (ServerCreationData) -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     textColor = Color.White,
-                    focusedBorderColor = if (isNameExists) Color.Red else Color(0xFF6200EE),
+                    focusedBorderColor = if (isNameExists) Color.Red else MaterialTheme.colors.primary,
                     unfocusedBorderColor = if (isNameExists) Color.Red else Color.White,
                     cursorColor = Color.White
                 )
@@ -64,7 +76,7 @@ fun CreateServerForm(onCreate: (ServerCreationData) -> Unit) {
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(if (jarPath.isEmpty()) "Choisir un fichier JAR" else "✅ JAR sélectionné")
+                Text(if (jarPath.isEmpty()) "Choisir un fichier JAR" else "JAR sélectionné")
             }
 
             Button(
@@ -73,13 +85,15 @@ fun CreateServerForm(onCreate: (ServerCreationData) -> Unit) {
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(if (targetFolder.isEmpty()) "Choisir un dossier cible" else "📁 ${targetFolder.takeLast(20)}")
+                Text(if (targetFolder.isEmpty()) "Choisir un dossier cible" else "${File(targetFolder).name}")
             }
 
             Button(
                 onClick = {
                     if (isFormValid) {
                         onCreate(ServerCreationData(name, jarPath, targetFolder))
+                        createServer(ServerCreationData(name, jarPath, targetFolder))
+                        ServerRepository.saveServer(ServerCreationData(name, jarPath, targetFolder))
                     }
                 },
                 enabled = isFormValid,
@@ -90,6 +104,25 @@ fun CreateServerForm(onCreate: (ServerCreationData) -> Unit) {
             ) {
                 Text(if (isNameExists) "Nom déjà pris" else "Créer le serveur")
             }
+
+            TextButton(
+                onClick = {
+                    val selectedFolder = selectFolderDialog("Choisir un dossier serveur existant")
+                    if (selectedFolder.isNotBlank()) {
+                        val name = File(selectedFolder).name
+                        val jar = File(selectedFolder).walkTopDown().firstOrNull { it.extension == "jar" }?.absolutePath.orEmpty()
+                        if (jar.isNotEmpty()) {
+                            onCreate(ServerCreationData(name, jar, File(selectedFolder).parent))
+                        } else {
+                            println("Aucun .jar trouvé dans le dossier sélectionné.")
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Ouvrir un serveur existant")
+            }
+
         }
     }
 }
